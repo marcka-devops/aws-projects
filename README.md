@@ -2,12 +2,6 @@
 
 AWS portfolio for cloud and DevOps engineering roles. This repository is where I publish the infrastructure and automation that show how I design, secure, and operate workloads on Amazon Web Services.
 
-## marck-devops-corp
-
-A multi-region platform in one Terraform module: production in Virginia, a warm standby in Oregon, a development network peered only for MySQL, and an isolated test stack whose database survives stack deletion.
-
-[![marck-devops-corp architecture](marck-devops-corp/architecture.jpeg)](marck-devops-corp)
-
 [Open the project](marck-devops-corp)
 
 ## What this work shows
