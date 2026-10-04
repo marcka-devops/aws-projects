@@ -1,0 +1,15 @@
+name: InstallCodeDeploy
+description: Install the CodeDeploy agent used by the application pipeline
+schemaVersion: 1.0
+phases:
+  - name: build
+    steps:
+      - name: InstallAgent
+        action: ExecuteBash
+        inputs:
+          commands:
+            - dnf install -y ruby wget
+            - cd /tmp
+            - wget -q https://aws-codedeploy-us-east-1.s3.us-east-1.amazonaws.com/latest/install
+            - chmod +x ./install
+            - ./install auto

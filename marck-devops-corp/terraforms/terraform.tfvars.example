@@ -1,0 +1,6 @@
+name_prefix      = "marck-devops-corp"
+domain_name      = "marck-devops-corp.example"
+admin_cidr    = "203.0.113.0/24"
+gitlab_url    = "https://gitlab.com"
+primary_region   = "us-east-1"
+secondary_region = "us-west-2"

@@ -1,0 +1,94 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Isolated test application. Deleting the stack keeps the database.
+
+Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+  WebSubnetId:
+    Type: AWS::EC2::Subnet::Id
+  AppSubnetId:
+    Type: AWS::EC2::Subnet::Id
+  DbSubnetA:
+    Type: AWS::EC2::Subnet::Id
+  DbSubnetB:
+    Type: AWS::EC2::Subnet::Id
+  WebSecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+  AppSecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+  DbSecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+  AmiId:
+    Type: AWS::EC2::Image::Id
+  InstanceProfileName:
+    Type: String
+  NamePrefix:
+    Type: String
+  DbName:
+    Type: String
+
+Resources:
+  WebInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref AmiId
+      InstanceType: t3.micro
+      IamInstanceProfile: !Ref InstanceProfileName
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: true
+          DeviceIndex: 0
+          GroupSet:
+            - !Ref WebSecurityGroupId
+          SubnetId: !Ref WebSubnetId
+      Tags:
+        - Key: Name
+          Value: !Sub "${NamePrefix}-test-web"
+
+  AppInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref AmiId
+      InstanceType: t3.micro
+      IamInstanceProfile: !Ref InstanceProfileName
+      SubnetId: !Ref AppSubnetId
+      SecurityGroupIds:
+        - !Ref AppSecurityGroupId
+      Tags:
+        - Key: Name
+          Value: !Sub "${NamePrefix}-test-app"
+
+  DbSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupName: !Sub "${NamePrefix}-test"
+      DBSubnetGroupDescription: !Sub "${NamePrefix} test database subnets"
+      SubnetIds:
+        - !Ref DbSubnetA
+        - !Ref DbSubnetB
+
+  Database:
+    Type: AWS::RDS::DBInstance
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      DBInstanceClass: db.t4g.micro
+      Engine: mysql
+      EngineVersion: "8.0"
+      AllocatedStorage: "20"
+      StorageEncrypted: true
+      DBName: !Ref DbName
+      MasterUsername: !Ref DbName
+      ManageMasterUserPassword: true
+      DBSubnetGroupName: !Ref DbSubnetGroup
+      VPCSecurityGroups:
+        - !Ref DbSecurityGroupId
+      PubliclyAccessible: false
+      DeletionProtection: true
+      BackupRetentionPeriod: 2
+      MultiAZ: false
+
+Outputs:
+  WebPublicIp:
+    Value: !GetAtt WebInstance.PublicIp
+  DatabaseEndpoint:
+    Value: !GetAtt Database.Endpoint.Address
