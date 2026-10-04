@@ -1,4 +1,4 @@
-# marck-devops-corp
+# Marck Multi-Region Corp.
 
 A multi-region AWS platform for one web application, written as a single Terraform root module.
 
