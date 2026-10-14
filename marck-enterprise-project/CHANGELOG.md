@@ -4,6 +4,11 @@ All notable changes to this project are recorded here. The format follows [Keep 
 
 ## [Unreleased]
 
+### Changed
+
+- README rewritten with an overview, project highlights and a step-by-step account of how the platform was built.
+- ElastiCache uses its own `valkey8` parameter group (`allkeys-lru`) instead of the non-editable default group, as flagged by TFLint.
+
 ## [1.0.0] - 2026-10-14
 
 ### Added
