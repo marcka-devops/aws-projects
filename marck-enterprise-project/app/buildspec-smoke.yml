@@ -1,0 +1,12 @@
+# CodeBuild: smoke test the QA instance after the QA deployment.
+# Production deploys only when this passes. QA_URL is set by the CodeBuild project.
+version: 0.2
+
+phases:
+  build:
+    commands:
+      - echo "Testing $QA_URL"
+      - curl -fsS --retry 5 --retry-delay 5 "$QA_URL/health.php" | grep -q '^ok$'
+      - curl -fsS "$QA_URL/hello.php" | grep -q 'Updated Hello World'
+      - curl -fsS "$QA_URL/" | grep -q 'Marck Enterprise'
+      - echo "QA smoke test passed"

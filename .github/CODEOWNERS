@@ -1,0 +1,5 @@
+# Every change needs a review from the owner. The Marck Enterprise infrastructure and its
+# pipelines are called out explicitly so the rule survives if other owners are added later.
+*                                       @marcka-devops
+/marck-enterprise-project/infra/        @marcka-devops
+/.github/workflows/                     @marcka-devops

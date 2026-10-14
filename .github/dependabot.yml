@@ -1,0 +1,24 @@
+# Weekly pull requests for outdated GitHub Actions and Terraform providers.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "chore(ci)"
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: terraform
+    directories:
+      - /marck-enterprise-project/infra/stacks/*
+      - /marck-enterprise-project/infra/modules/*
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "chore(terraform)"
+    groups:
+      terraform-providers:
+        patterns: ["*"]

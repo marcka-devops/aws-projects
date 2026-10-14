@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Marck Enterprise</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="bar">
+    <span class="brand">Marck Enterprise</span>
+    <nav><a href="https://app.${domain}">Branch portal</a></nav>
+  </header>
+
+  <main>
+    <h1>Reports for every branch, from one platform.</h1>
+    <p class="lede">Marck Enterprise runs its branch reporting on AWS across two regions. This page is a static site served from a private S3 bucket through CloudFront.</p>
+
+    <section class="grid">
+      <article>
+        <h2>Always available</h2>
+        <p>The branch portal runs in N. Virginia and Oregon behind AWS Global Accelerator.</p>
+      </article>
+      <article>
+        <h2>Fast reports</h2>
+        <p>Repeated report requests come from an in-memory cache instead of the database.</p>
+      </article>
+      <article>
+        <h2>Shipped by pipeline</h2>
+        <p>Every change is built, tested in QA, then promoted to production automatically.</p>
+      </article>
+    </section>
+  </main>
+
+  <footer>Served at ${www}</footer>
+</body>
+</html>

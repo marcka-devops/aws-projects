@@ -1,0 +1,46 @@
+name: Bug report
+description: Something deployed or behaves differently from the code or docs
+labels: [bug]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Network (10-network)
+        - Security / IAM (20-security)
+        - Data (30-data)
+        - Storage / website (40-storage)
+        - Compute (50-compute)
+        - Delivery pipeline (60-delivery)
+        - Self-service (70-self-service)
+        - Application / Lambda
+        - CI / GitHub Actions
+        - Docs / diagrams
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: Include the error text, plan output or log lines.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. make apply STACK=...
+        2. ...
+  - type: input
+    id: versions
+    attributes:
+      label: Terraform and AWS provider versions
+      placeholder: Terraform 1.16.4, hashicorp/aws 6.68.0

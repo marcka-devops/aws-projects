@@ -1,0 +1,46 @@
+#!/bin/bash
+# Web server bootstrap for Amazon Linux 2023.
+# Packages are skipped when the instance already came from the Packer golden AMI.
+set -euo pipefail
+exec > >(tee /var/log/marck-bootstrap.log) 2>&1
+
+REGION="${region}"
+ROLE="${role}"
+FSX_DNS="${fsx_dns}"
+
+if ! command -v httpd >/dev/null 2>&1; then
+  dnf install -y httpd php php-cli php-mysqlnd php-fpm php-json ruby wget nfs-utils amazon-cloudwatch-agent
+fi
+
+# CodeDeploy agent, from the regional bucket.
+if ! systemctl list-unit-files | grep -q codedeploy-agent; then
+  cd /tmp
+  wget -q "https://aws-codedeploy-$${REGION}.s3.$${REGION}.amazonaws.com/latest/install"
+  chmod +x ./install
+  ./install auto
+fi
+systemctl enable --now codedeploy-agent
+
+# Placeholder until the first pipeline deployment replaces it.
+mkdir -p /var/www/html
+if [ ! -f /var/www/html/index.php ]; then
+  cat > /var/www/html/index.php <<'PHP'
+<?php echo "<h1>Marck Enterprise</h1><p>Waiting for the first deployment.</p>"; ?>
+PHP
+fi
+cat > /var/www/html/health.php <<'PHP'
+<?php http_response_code(200); echo "ok"; ?>
+PHP
+
+systemctl enable --now php-fpm httpd
+
+# Shared files (AWS Organizations case study: one FSx file system mounted on the web servers).
+if [ -n "$FSX_DNS" ]; then
+  mkdir -p /mnt/shared
+  if ! grep -q "$FSX_DNS" /etc/fstab; then
+    echo "$FSX_DNS:/fsx /mnt/shared nfs nfsvers=4.1,_netdev,nofail 0 0" >> /etc/fstab
+  fi
+  mount -a || echo "FSx mount failed; it will retry at next boot"
+fi
+
+echo "$ROLE" > /etc/marck-role
