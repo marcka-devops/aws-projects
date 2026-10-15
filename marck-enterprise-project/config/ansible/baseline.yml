@@ -1,0 +1,60 @@
+---
+# Baseline for every instance tagged ConfigManaged=true.
+# Applied by Systems Manager State Manager once a day, so manual drift is corrected.
+- name: Marck Enterprise server baseline
+  hosts: localhost
+  connection: local
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Install baseline packages
+      ansible.builtin.dnf:
+        name:
+          - chrony
+          - amazon-cloudwatch-agent
+          - jq
+        state: present
+
+    - name: Apply security updates  # noqa: package-latest
+      ansible.builtin.dnf:
+        name: "*"
+        security: true
+        update_only: true
+        state: latest
+
+    - name: Keep time in sync
+      ansible.builtin.service:
+        name: chronyd
+        state: started
+        enabled: true
+
+    - name: Disable SSH root login
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "^#?PermitRootLogin"
+        line: "PermitRootLogin no"
+        validate: "sshd -t -f %s"
+      notify: Restart sshd
+
+    - name: Disable SSH password authentication
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "^#?PasswordAuthentication"
+        line: "PasswordAuthentication no"
+        validate: "sshd -t -f %s"
+      notify: Restart sshd
+
+    - name: Login banner
+      ansible.builtin.copy:
+        dest: /etc/motd
+        mode: "0644"
+        content: |
+          Marck Enterprise | managed by Ansible through AWS Systems Manager
+          Host: {{ ansible_hostname }}  Changes made by hand are reverted daily.
+
+  handlers:
+    - name: Restart sshd
+      ansible.builtin.service:
+        name: sshd
+        state: restarted

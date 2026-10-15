@@ -1,0 +1,23 @@
+name: Improvement
+description: Propose a change to the platform, pipeline or docs
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is missing or hard today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: What should change? Name the stacks or files if you know them.
+    validations:
+      required: true
+  - type: textarea
+    id: cost
+    attributes:
+      label: Cost and risk
+      description: Does this add running cost, replace resources, or change who can access what?

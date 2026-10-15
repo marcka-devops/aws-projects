@@ -1,0 +1,39 @@
+# Marck Enterprise, AWS DevOps case study task 2: "migrate the GitHub repository into CodeCommit".
+# GitHub stays the working repository; every push to main that touches the project is mirrored
+# to CodeCommit, which is the source of the release pipeline. Uses OIDC, so no AWS keys are stored.
+#
+# Needs the repository variable AWS_MIRROR_ROLE_ARN (output of infra/stacks/60-delivery).
+name: Marck Enterprise mirror to CodeCommit
+
+on:
+  push:
+    branches: [main]
+    paths: ["marck-enterprise-project/**"]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: marck-enterprise-codecommit-mirror
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    if: vars.AWS_MIRROR_ROLE_ARN != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ vars.AWS_MIRROR_ROLE_ARN }}
+          aws-region: us-east-1
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - run: pip install git-remote-codecommit
+      - name: Push main to CodeCommit
+        run: git push --force "codecommit::us-east-1://${{ vars.CODECOMMIT_REPO || 'marck-enterprise' }}" HEAD:refs/heads/main

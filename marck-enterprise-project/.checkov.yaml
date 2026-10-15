@@ -1,0 +1,27 @@
+# Checkov security scan for infra/ (Terraform and CloudFormation).
+# Report-only for now: findings show in the CI log and job summary without blocking merges.
+# Each skip below is a deliberate trade-off for a portfolio-sized deployment, not an oversight.
+framework:
+  - terraform
+  - cloudformation
+soft-fail: true
+compact: true
+quiet: true
+skip-check:
+  - CKV_AWS_18     # S3 server access logging: CloudTrail data is enough at this size; adds a log bucket per bucket
+  - CKV_AWS_144    # S3 cross-region replication: only the analytics/asset data would need it; not required by the brief
+  - CKV_AWS_145    # S3 SSE-KMS by default: SSE-S3 is used to avoid per-request KMS cost
+  - CKV2_AWS_62    # S3 event notifications on every bucket: only the assets bucket needs one
+  - CKV_AWS_68     # CloudFront WAF: static site, no forms; add AWS WAF when the site takes input
+  - CKV2_AWS_47    # CloudFront WAF Log4j rule: see CKV_AWS_68
+  - CKV_AWS_86     # CloudFront access logs: enable when traffic analysis is needed
+  - CKV_AWS_310    # CloudFront origin failover: single S3 origin by design
+  - CKV2_AWS_28    # ALB WAF: add AWS WAF before taking real customer traffic
+  - CKV_AWS_91     # ALB access logs: enable with a log bucket when needed
+  - CKV_AWS_158    # CloudWatch log groups with KMS: AWS-managed encryption is used
+  - CKV_AWS_338    # Log retention of 1 year: 30 days keeps cost down for a demo
+  - CKV_AWS_116    # Lambda DLQ: Kinesis consumer uses bisect + retries; S3 trigger is idempotent
+  - CKV_AWS_117    # Lambda inside a VPC: neither function needs private network access
+  - CKV_AWS_173    # Lambda environment encryption with a CMK: no secrets in environment variables
+  - CKV_AWS_272    # Lambda code signing: functions are built and deployed from CI only
+  - CKV_AWS_115    # Lambda reserved concurrency: on-demand Kinesis sets its own pace

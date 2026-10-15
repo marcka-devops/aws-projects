@@ -1,0 +1,27 @@
+# Run the same checks as CI before each commit. From the repository root:
+#   pip install pre-commit && pre-commit install -c marck-enterprise-project/.pre-commit-config.yaml
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: [--unsafe]   # CloudFormation short-form tags such as !Ref
+      - id: check-merge-conflict
+      - id: detect-private-key
+
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.109.2
+    hooks:
+      - id: terraform_fmt
+      - id: terraform_validate
+        args: [--hook-config=--retry-once-with-cleanup=true, --tf-init-args=-backend=false]
+      - id: terraform_tflint
+        args: [--args=--config=__GIT_WORKING_DIR__/.tflint.hcl]
+
+  - repo: https://github.com/aws-cloudformation/cfn-lint
+    rev: v1.57.2
+    hooks:
+      - id: cfn-lint
+        files: marck-enterprise-project/infra/cloudformation/.*\.yaml$

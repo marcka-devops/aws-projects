@@ -1,0 +1,114 @@
+# Marck Enterprise: static checks and unit tests on every pull request and push to main.
+# Nothing here touches AWS, so it runs before any credentials exist.
+# GitHub runs workflows only from .github/ at a repository root. Paths below assume this
+# project sits in marck-enterprise-project/; copy .github/ to the root to enable it.
+name: Marck Enterprise CI
+
+on:
+  pull_request:
+    paths: ["marck-enterprise-project/**", ".github/workflows/marck-enterprise-ci.yml"]
+  push:
+    branches: [main]
+    paths: ["marck-enterprise-project/**", ".github/workflows/marck-enterprise-ci.yml"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: marck-enterprise-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TF_VERSION: "1.16.4"
+  PROJECT_DIR: marck-enterprise-project
+
+defaults:
+  run:
+    working-directory: marck-enterprise-project
+
+jobs:
+  terraform:
+    name: Terraform fmt + validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+      - name: Format
+        run: terraform fmt -check -recursive -diff infra
+      - name: Validate every stack
+        run: |
+          for stack in infra/stacks/*/; do
+            echo "::group::$stack"
+            terraform -chdir="$stack" init -backend=false -input=false
+            terraform -chdir="$stack" validate
+            echo "::endgroup::"
+          done
+
+  tflint:
+    name: TFLint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: terraform-linters/setup-tflint@v6
+      - run: tflint --init --config "$GITHUB_WORKSPACE/$PROJECT_DIR/.tflint.hcl"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - run: tflint --recursive --config "$GITHUB_WORKSPACE/$PROJECT_DIR/.tflint.hcl" --chdir infra
+
+  checkov:
+    name: Checkov (security scan)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: marck-enterprise-project/infra
+          config_file: marck-enterprise-project/.checkov.yaml
+
+  cloudformation:
+    name: cfn-lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - run: pip install cfn-lint
+      - run: cfn-lint infra/cloudformation/*.yaml
+
+  app:
+    name: PHP app tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+      - name: Lint
+        run: find app/src app/tests -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Test
+        run: php app/tests/run_tests.php
+
+  lambda:
+    name: Lambda unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - run: python -m unittest discover -s functions/tests -v
+
+  config:
+    name: Ansible + shell lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - run: pip install ansible-core ansible-lint
+      - run: ansible-lint config/ansible
+      - run: shellcheck app/scripts/*.sh packer/scripts/*.sh

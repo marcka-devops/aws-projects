@@ -1,0 +1,33 @@
+# Marck Enterprise golden AMI (EC2/EBS case study, tasks 1-2): build the web server image in
+# us-east-1 and copy it to us-west-2. Afterwards set golden_ami_name in 50-compute to roll the fleets onto it.
+name: Marck Enterprise golden AMI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["marck-enterprise-project/packer/**"]
+
+permissions:
+  id-token: write
+  contents: read
+
+defaults:
+  run:
+    working-directory: marck-enterprise-project
+
+jobs:
+  build:
+    if: vars.AWS_APPLY_ROLE_ARN != ''
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v7
+      - uses: hashicorp/setup-packer@v3
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ vars.AWS_APPLY_ROLE_ARN }}
+          aws-region: us-east-1
+      - run: packer init packer
+      - run: packer validate packer
+      - run: packer build -color=false packer

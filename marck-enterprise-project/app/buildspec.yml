@@ -1,0 +1,35 @@
+# CodeBuild: lint, test, and package one bundle that CodeDeploy and Elastic Beanstalk both accept.
+# Runs from the repository root. APP_DIR (set on the CodeBuild project) is the path to this folder,
+# e.g. marck-enterprise-project/app. The bundle is written to dist/ at the repository root.
+version: 0.2
+
+env:
+  variables:
+    APP_DIR: app
+
+phases:
+  install:
+    runtime-versions:
+      php: 8.3
+  pre_build:
+    commands:
+      - cd "$CODEBUILD_SRC_DIR/$APP_DIR"
+      - find src tests -name '*.php' -print0 | xargs -0 -n1 php -l
+  build:
+    commands:
+      - cd "$CODEBUILD_SRC_DIR/$APP_DIR"
+      - php tests/run_tests.php
+  post_build:
+    commands:
+      - cd "$CODEBUILD_SRC_DIR/$APP_DIR"
+      - DIST="$CODEBUILD_SRC_DIR/dist"
+      - rm -rf "$DIST" && mkdir -p "$DIST"
+      - cp -r src/. "$DIST/"
+      - cp appspec.yml "$DIST/"
+      - cp -r scripts .ebextensions "$DIST/"
+      - echo "${CODEBUILD_RESOLVED_SOURCE_VERSION:-local}" > "$DIST/version.txt"
+
+artifacts:
+  base-directory: dist
+  files:
+    - '**/*'

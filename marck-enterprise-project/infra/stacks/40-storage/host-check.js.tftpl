@@ -1,0 +1,16 @@
+// CloudFront Function (viewer request).
+// Requests for any host other than ${www} get the error page instead of the site.
+function handler(event) {
+  var request = event.request;
+  var host = request.headers.host ? request.headers.host.value.toLowerCase() : "";
+
+  if (host !== "${www}") {
+    request.uri = "/error.html";
+    return request;
+  }
+
+  if (request.uri.endsWith("/")) {
+    request.uri += "index.html";
+  }
+  return request;
+}

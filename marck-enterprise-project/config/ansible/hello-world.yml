@@ -1,0 +1,34 @@
+---
+# Replaces the OpsWorks stack from the Automation case study:
+# host a Hello World HTML page on the instance tagged Role=hello-world.
+- name: Hello World web page
+  hosts: localhost
+  connection: local
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Install Apache
+      ansible.builtin.dnf:
+        name: httpd
+        state: present
+
+    - name: Publish the page
+      ansible.builtin.copy:
+        dest: /var/www/html/index.html
+        mode: "0644"
+        content: |
+          <!doctype html>
+          <html lang="en">
+          <head><meta charset="utf-8"><title>Hello World | Marck Enterprise</title></head>
+          <body style="font-family: system-ui, sans-serif; margin: 48px;">
+            <h1>Hello World</h1>
+            <p>Configured by Ansible through AWS Systems Manager on {{ ansible_hostname }}.</p>
+          </body>
+          </html>
+
+    - name: Start Apache
+      ansible.builtin.service:
+        name: httpd
+        state: started
+        enabled: true
