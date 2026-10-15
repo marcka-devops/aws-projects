@@ -1,7 +1,7 @@
 # Marck Enterprise: static checks and unit tests on every pull request and push to main.
 # Nothing here touches AWS, so it runs before any credentials exist.
-# The project lives in marck-enterprise-project/; this file sits at the repository root
-# because GitHub only runs workflows from .github/workflows.
+# GitHub runs workflows only from .github/ at a repository root. Paths below assume this
+# project sits in marck-enterprise-project/; copy .github/ to the root to enable it.
 name: Marck Enterprise CI
 
 on:

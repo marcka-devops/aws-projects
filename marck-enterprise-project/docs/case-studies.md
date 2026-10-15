@@ -104,7 +104,7 @@ Load-test the scale-out: `sudo dnf install -y stress-ng && stress-ng --cpu 2 --t
 | Task | Implementation | Check |
 | --- | --- | --- |
 | Website in GitHub | This repository (`app/`) | — |
-| Migrate the GitHub repository to CodeCommit | `.github/workflows/marck-enterprise-codecommit-mirror.yml` (repository root) pushes `main` to CodeCommit through OIDC | `aws codecommit get-branch --repository-name marck-enterprise --branch-name main` |
+| Migrate the GitHub repository to CodeCommit | `.github/workflows/marck-enterprise-codecommit-mirror.yml` pushes `main` to CodeCommit through OIDC | `aws codecommit get-branch --repository-name marck-enterprise --branch-name main` |
 | CodeDeploy deployments for QA and production on EC2 | Deployment groups `qa` (dev `web` instance) and `production` (Auto Scaling group) | CodeDeploy console |
 | CodePipeline: CodeCommit source, QA then production, production only after QA | `60-delivery/pipeline.tf`: Source → Build → QA (deploy + smoke test) → Production | Push a change and watch the pipeline |
 | Third stage to Elastic Beanstalk | `Beanstalk` stage | `beanstalk_url` output |

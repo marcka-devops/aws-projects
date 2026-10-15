@@ -35,5 +35,5 @@ Scopes match the top-level folders and stacks: `network`, `security`, `data`, `s
 | Tags | Set through `default_tags` in `providers.tf`: `Project`, `Environment`, `Stack`, `ManagedBy`. |
 | Secrets | Never in code or variables files. Use Secrets Manager and reference it. |
 | Cross-stack values | Read through `terraform_remote_state`; add an output to the producing stack instead of hard-coding IDs. |
-| New stack | Add it to `STACKS` in the `Makefile`, the matrix in `.github/workflows/marck-enterprise-terraform.yml` (repository root), Dependabot, and `infra/README.md`. |
+| New stack | Add it to `STACKS` in the `Makefile`, the matrix in `.github/workflows/marck-enterprise-terraform.yml`, Dependabot, and `infra/README.md`. |
 | Docs | If a change affects how something is operated, update `docs/runbooks.md`. If it changes a design choice, add an ADR in `docs/adr/`. |

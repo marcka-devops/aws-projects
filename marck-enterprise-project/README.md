@@ -4,8 +4,6 @@
 
 **A two-region AWS platform, designed, built and delivered entirely as code.**
 
-[![CI](https://github.com/marcka-devops/aws-projects/actions/workflows/marck-enterprise-ci.yml/badge.svg)](https://github.com/marcka-devops/aws-projects/actions/workflows/marck-enterprise-ci.yml)
-[![Terraform](https://github.com/marcka-devops/aws-projects/actions/workflows/marck-enterprise-terraform.yml/badge.svg)](https://github.com/marcka-devops/aws-projects/actions/workflows/marck-enterprise-terraform.yml)
 ![Terraform](https://img.shields.io/badge/Terraform-%E2%89%A51.10-7B42BC?logo=terraform&logoColor=white)
 ![AWS provider](https://img.shields.io/badge/hashicorp%2Faws-6.x-FF9900?logo=amazonwebservices&logoColor=white)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -188,33 +186,31 @@ The project was built in the order a platform would be stood up in a real accoun
 ## Repository structure
 
 ```
-aws-projects/
-├── .github/                      Repository root: GitHub only runs workflows from here
-│   ├── workflows/                marck-enterprise-ci · -terraform · -codecommit-mirror · -packer
-│   ├── ISSUE_TEMPLATE/           Bug and improvement forms
-│   └── CODEOWNERS · dependabot.yml · pull_request_template.md
-└── marck-enterprise-project/     This project
-    ├── app/                      PHP branch portal, CodeDeploy hooks, buildspecs, tests
-    ├── config/ansible/           Playbooks applied by Systems Manager
-    ├── docs/
-    │   ├── architecture/         draw.io source and PNG exports
-    │   ├── adr/                  Architecture decision records
-    │   ├── getting-started.md
-    │   ├── case-studies.md       Every case-study task → code → how to check it
-    │   ├── runbooks.md
-    │   └── cost-and-teardown.md
-    ├── functions/                Lambda functions and unit tests
-    ├── infra/
-    │   ├── modules/              vpc · nacl · web_fleet
-    │   ├── stacks/               00-bootstrap → 70-self-service (apply in order)
-    │   └── cloudformation/       Developer test-stack template
-    ├── packer/                   Golden AMI
-    ├── website/                  Static site for www.<domain>
-    ├── Makefile                  make help
-    └── CHANGELOG.md · CONTRIBUTING.md · SECURITY.md · LICENSE
+marck-enterprise-project/
+├── .github/                  Workflows (CI, Terraform, CodeCommit mirror, Packer), code owners, Dependabot, templates
+├── app/                      PHP branch portal, CodeDeploy hooks, buildspecs, tests
+├── config/ansible/           Playbooks applied by Systems Manager
+├── docs/
+│   ├── architecture/         draw.io source and PNG exports
+│   ├── adr/                  Architecture decision records
+│   ├── getting-started.md
+│   ├── case-studies.md       Every case-study task → code → how to check it
+│   ├── runbooks.md
+│   └── cost-and-teardown.md
+├── functions/                Lambda functions and unit tests
+├── infra/
+│   ├── modules/              vpc · nacl · web_fleet
+│   ├── stacks/               00-bootstrap → 70-self-service (apply in order)
+│   └── cloudformation/       Developer test-stack template
+├── packer/                   Golden AMI
+├── website/                  Static site for www.<domain>
+├── Makefile                  make help
+└── CHANGELOG.md · CONTRIBUTING.md · SECURITY.md · LICENSE
 ```
 
 See [infra/README.md](infra/README.md) for what each stack creates and the available feature toggles.
+
+> **Running the workflows:** GitHub only runs workflows from `.github/` at the root of a repository. This project keeps its `.github/` inside the project folder so it is self-contained. To enable CI and the pipelines, publish `marck-enterprise-project/` as its own repository, or copy `.github/` to the repository root.
 
 ## Quick start
 
@@ -254,7 +250,7 @@ With default settings the platform costs about **$1.40 per hour** (roughly $1,00
 | 7 | Multi-tier architecture | `infra/cloudformation/`, `70-self-service` |
 | 8 | Automation and configuration management | `60-delivery`, `40-storage`, `config/ansible/` |
 | 9 | FSx, Global Accelerator, network interfaces | `50-compute` |
-| 10 | AWS DevOps (CI/CD) | `60-delivery`, [`.github/workflows/`](../.github/workflows) |
+| 10 | AWS DevOps (CI/CD) | `60-delivery`, [`.github/workflows/`](.github/workflows) |
 
 The [coverage map](docs/case-studies.md) lists every task, where it is implemented, and how to verify it.
 

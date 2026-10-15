@@ -6,6 +6,7 @@ All notable changes to this project are recorded here. The format follows [Keep 
 
 ### Changed
 
+- `.github/` (workflows, code owners, Dependabot, templates) moved inside the project folder. The workflows run once `.github/` is at a repository root.
 - README rewritten with an overview, project highlights and a step-by-step account of how the platform was built.
 - ElastiCache uses its own `valkey8` parameter group (`allkeys-lru`) instead of the non-editable default group, as flagged by TFLint.
 
